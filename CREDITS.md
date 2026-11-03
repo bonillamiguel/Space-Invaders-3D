@@ -1,7 +1,7 @@
 # Credits
 
 ## Game
-Created by Miguel Bonilla for CS 381 Game Development
+Created by Miguel Bonilla for CSCI 381: Video Game Design and Development, Fall 2026
 
 ## 3D Models
 - "Little Slime" (model and texture) by SketchStick, https://opengameart.org/content/little-slime, CC0
@@ -14,8 +14,6 @@ Created by Miguel Bonilla for CS 381 Game Development
 
 ## Fonts
 - "Boxy Bold - TrueType Font" by William.Thompsonj, https://opengameart.org/content/boxy-bold-truetype-font, public domain
-  - Based on the original Boxy Bold by Clint Bellanger, with contributions from cemkalyoncu and usr_share
-- Liberation Sans, included with TextMesh Pro, SIL Open Font License
 
 ## Tools
 - Built with Unity 6

@@ -14,7 +14,7 @@ public class Spaceship : MonoBehaviour
     public float speed = 10f;
     public float edgePadding = 1.3f;
     public int lives = 3;
-    public float invulnerableTime = 1.5f;
+    public float invulnerableTime = 1.2f;
     public float flashInterval = .1f;
     public Image[] hearts;
     public Sprite fullHeart;
