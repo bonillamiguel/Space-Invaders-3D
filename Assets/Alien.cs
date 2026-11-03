@@ -7,27 +7,14 @@ public class Alien : MonoBehaviour
     public GameObject bulletPrefab;
     public AlienFleet fleet;
     
-    static float bulletSpawnRate = .002f;
     public float lastShot = 0;
     public static float shotCooldown = .1f;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     void FixedUpdate()
     {
         Vector3 position = transform.position;
         
-        if(UnityEngine.Random.value < bulletSpawnRate && Time.time - lastShot > shotCooldown){
+        if(UnityEngine.Random.value < fleet.alienFireChance && Time.time - lastShot > shotCooldown){
             GameObject bullet = Instantiate<GameObject>(bulletPrefab);
             bullet.transform.position = position;
             lastShot = Time.time;
@@ -36,8 +23,17 @@ public class Alien : MonoBehaviour
 
     void OnCollisionEnter(Collision coll)
     {
-        fleet.GetComponent<AlienFleet>().aliens.Remove(gameObject);
+        fleet.aliens.Remove(gameObject);
         Destroy(gameObject);
-        Destroy(coll.gameObject);
+
+        Spaceship ship = coll.gameObject.GetComponent<Spaceship>();
+        if (ship != null)
+        {
+            ship.LoseLife();
+        }
+        else
+        {
+            Destroy(coll.gameObject);
+        }
     }
 }

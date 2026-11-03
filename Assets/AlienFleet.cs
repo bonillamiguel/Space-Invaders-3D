@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.InputSystem;
 
 public class AlienFleet : MonoBehaviour
 {
@@ -8,16 +7,21 @@ public class AlienFleet : MonoBehaviour
 
     public GameObject alienPrefab;
 
-    public AlienCounter alienCounter;
-
     public List<GameObject> aliens = new List<GameObject> { };
 
     float speed = .1f;
-    float leftBound = -16;
-    float rightBound = 16;
-    float lowerBound = 4.8f;
+    public float maxSpeed = .4f;
+    public float startShotsPerSecond = 3f;
+    public float maxShotsPerSecond = 6f;
+    [HideInInspector] public float alienFireChance;
+    int startingAlienCount;
+    int direction = 1;
+
+    public float edgePadding = 1f;
+    public float invasionMargin = 1.3f;
     float downTime = .1f;
     bool movingDown = false;
+    Spaceship spaceship;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -32,42 +36,53 @@ public class AlienFleet : MonoBehaviour
                 alien.GetComponent<Alien>().fleet = this;
             }
         }
+        startingAlienCount = aliens.Count;
+        spaceship = FindAnyObjectByType<Spaceship>();
 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        alienCounter.score = aliens.Count;
     }
 
     void FixedUpdate()
     {
+        if (aliens.Count == 0)
+        {
+            if (spaceship != null)
+            {
+                spaceship.Win();
+            }
+            return;
+        }
+
+        float progress = 1 - aliens.Count / (float)startingAlienCount;
+        float currentSpeed = Mathf.Lerp(speed, maxSpeed, progress);
+
+        // Split the fleet's total fire rate between the aliens that are left
+        float shotsPerSecond = Mathf.Lerp(startShotsPerSecond, maxShotsPerSecond, progress);
+        alienFireChance = shotsPerSecond * Time.fixedDeltaTime / aliens.Count;
+
         //move all aliens
         foreach (GameObject alien in aliens)
         {
             Vector3 position = alien.transform.position;
             if (!movingDown)
             {
-                position.x += speed;
+                position.x += direction * currentSpeed;
             }
             else
             {
-                position.y += -Mathf.Abs(speed);
-                /*if (position.y <= lowerBound)
-                {
-                    movingDown = false;
-                    lowerBound = position.y - 1;
-                }*/
+                position.y -= currentSpeed;
             }
             alien.transform.position = position;
         }
 
         //change alien direction
-        float left = 0, right = 0;
+        float left = 0, right = 0, lowest = Mathf.Infinity;
         foreach (GameObject alien in aliens)
         {
             Vector3 position = alien.transform.position;
+            if (position.y < lowest)
+            {
+                lowest = position.y;
+            }
             if (position.x > right)
             {
                 right = position.x;
@@ -77,11 +92,23 @@ public class AlienFleet : MonoBehaviour
                 left = position.x;
             }
         }
-        if (speed > 0 && right >= rightBound || speed < 0 && left <= leftBound)
+
+        // Turn at the screen edges, recalculated in case the window is resized
+        Camera cam = Camera.main;
+        float limit = cam.orthographicSize * cam.aspect - edgePadding;
+        float leftBound = cam.transform.position.x - limit;
+        float rightBound = cam.transform.position.x + limit;
+        if (direction > 0 && right >= rightBound || direction < 0 && left <= leftBound)
         {
-            speed = -speed;
+            direction = -direction;
             movingDown = true;
             Invoke("startSidewaysMotion", downTime);
+        }
+
+        // Darts only fly upward from the ship, so the game is lost once an alien gets this close to its height
+        if (spaceship != null && lowest <= spaceship.transform.position.y + invasionMargin)
+        {
+            spaceship.GameOver();
         }
     }
 

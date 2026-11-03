@@ -112,3 +112,9 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Burst output from Web builds
+/Data/
+
+# macOS Finder metadata
+.DS_Store
